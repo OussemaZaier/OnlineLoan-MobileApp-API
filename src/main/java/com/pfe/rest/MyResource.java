@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-
+import com.pfe.Entity.User;
 
 import jakarta.annotation.security.PermitAll;
 
@@ -17,6 +17,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 
 /**
@@ -32,20 +33,76 @@ public class MyResource {
      * @return String that will be returned as a text/plain response.
      */
     @GET
+    @Path("/get")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getIt() {
+    public Response getUser(@HeaderParam("CIN") String cin) {
+
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM USERS WHERE CIN="+cin;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+			
+			if(resultSet.next()) {
+			
+				User user=new User();
+				
+				user.setCIN(resultSet.getString("CIN"));
+			    user.setName(resultSet.getString("USERNAME"));
+			    user.setPhoneNumber(resultSet.getString("TEL"));
+
+			    return Response.ok(user, MediaType.APPLICATION_JSON).build();
+           
+            }
+			else 
+			{
+				return Response.status(Response.Status.NOT_FOUND).entity("Entity not found for CIN: " + cin).build();
+			}
+			
+    	}
+    
     	
-  //  SqlConnect sq= new SqlConnect();
- //   String str=sq.Connect();
-  //  try {
-  //  SHA sha= new SHA();
-  //  String str1= SHA.toHexString(sha.getSHA("123456"));
+    	catch( Exception e ) {
+    		return Response.status(Response.Status.NOT_FOUND).entity("server").build();
+    	}
+    }
+    
+    @POST
+    @Path("/exist")
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    public String userExist (@HeaderParam("CIN") String cin) 
+    {
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM USERS WHERE CIN="+cin;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+			
+			if(resultSet.next()) {
+
+			    return "1";
+           
+            }
+			else 
+			{
+				return "2";
+			}
+			
+    	}
+    
     	
-    //    return str+" "+str1;
-    //    }
-   // catch (NoSuchAlgorithmException e) {  
-       return("Exception thrown for incorrect algorithm: " );  
-  //  } 
+    	catch( Exception e ) {
+    		return e.getMessage().toString();
+    	}
     }
     
     @POST
@@ -123,6 +180,86 @@ public class MyResource {
 				 
 				 resultSet = preparedStatement.executeQuery();
 				 return "succes";
+			}
+    		}
+    	catch( Exception e ) {
+    		return e.getMessage().toString();
+    	}
+		
+    }
+    
+    @PUT
+    @Path("/update")
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    public String update (@HeaderParam("UserCIN") String userCIN,@HeaderParam("CIN") String cin,@HeaderParam("TEL") String tel, @HeaderParam("Username") String Username) 
+    {
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM USERS WHERE CIN="+userCIN;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+			
+			if(resultSet.next()) {
+				statement="UPDATE USERS SET cin=? , tel=? , username=? where CIN="+userCIN;
+				 
+				 preparedStatement = conn.prepareStatement(statement);
+				 int tel1=Integer.parseInt(tel);
+				 preparedStatement.setString(1,cin);
+				 preparedStatement.setInt(2,tel1);
+				 preparedStatement.setString(3,Username);
+				 
+				 resultSet = preparedStatement.executeQuery();
+				return "success";
+				
+			}else {
+				 
+				 return "user doesnt exist";
+			}
+    		}
+    	catch( Exception e ) {
+    		return e.getMessage().toString();
+    	}
+		
+    }
+    @PUT
+    @Path("/updatePWD")
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    public String updatePWD (@HeaderParam("UserCIN") String userCIN, @HeaderParam("oldPWD") String oldPWD, @HeaderParam("newPWD") String newPWD) 
+    {
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM USERS WHERE CIN="+userCIN;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+			
+			if(resultSet.next()) {
+				String ch=resultSet.getString("PASSWORD");
+				if(ch.equals(oldPWD)) {
+					statement="UPDATE USERS SET PASSWORD=? where CIN="+userCIN;
+					 
+					 preparedStatement = conn.prepareStatement(statement);
+					 preparedStatement.setString(1,newPWD);
+					 
+					 resultSet = preparedStatement.executeQuery();
+					return "success";
+				}
+				else {
+					return "wrong";
+				}
+				
+			}else {
+				 
+				 return "user doesnt exist";
 			}
     		}
     	catch( Exception e ) {
