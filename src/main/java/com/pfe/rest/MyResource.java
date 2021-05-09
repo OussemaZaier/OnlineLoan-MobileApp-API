@@ -250,15 +250,15 @@ public class MyResource {
 					 preparedStatement.setString(1,newPWD);
 					 
 					 resultSet = preparedStatement.executeQuery();
-					return "success";
+					return "1";
 				}
 				else {
-					return "wrong";
+					return "2";
 				}
 				
 			}else {
 				 
-				 return "user doesnt exist";
+				 return "2";
 			}
     		}
     	catch( Exception e ) {
