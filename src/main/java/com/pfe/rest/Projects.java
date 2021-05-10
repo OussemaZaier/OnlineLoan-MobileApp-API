@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import com.pfe.Entity.Guarantee;
+import com.pfe.Entity.Local;
 import com.pfe.Entity.Project;
 
 import jakarta.annotation.security.PermitAll;
@@ -147,6 +149,139 @@ public class Projects {
 				 preparedStatement.setString(1,name);
 				 preparedStatement.setString(2,desc);
 				 preparedStatement.setFloat(3,surface1);
+				 resultSet = preparedStatement.executeQuery();
+				return "success";
+				
+			}else {
+				 
+				 return "project doesnt exist";
+			}
+    		}
+    	catch( Exception e ) {
+    		return e.getMessage().toString();
+    	}
+		
+    }
+    @GET
+    @Path("/getLI")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLocalInfo(@HeaderParam("ID") String ID) {
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM PROJECTS WHERE ID_PROJECT="+ID;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+			
+			if(resultSet.next()) {
+					Local local=new Local(resultSet.getString("ADDRESS"),resultSet.getString("LATITUDE"),resultSet.getString("LONGITUDE"));
+					return Response.ok(local, MediaType.APPLICATION_JSON).build();   
+            }
+			else {
+				return Response.status(Response.Status.NOT_FOUND).entity("server").build();
+			}
+			
+    	}
+    
+    	
+    	catch( Exception e ) {
+    		return Response.status(Response.Status.NOT_FOUND).entity("server").build();
+    	}
+
+    }
+    @PUT
+    @Path("/updateLI")
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    public String updateLI (@HeaderParam("ID") String ID,@HeaderParam("address") String address,@HeaderParam("latitude") String latitude,@HeaderParam("longitude") String longitude) 
+    {
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM PROJECTS WHERE ID_PROJECT="+ID;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+
+			if(resultSet.next()) {
+
+				 statement="UPDATE PROJECTS SET ADDRESS=? , LATITUDE=?, LONGITUDE=? where ID_PROJECT="+ID;
+				 preparedStatement = conn.prepareStatement(statement);
+				 preparedStatement.setString(1,address);
+				 preparedStatement.setString(2,latitude);
+				 preparedStatement.setString(3,longitude);
+				 resultSet = preparedStatement.executeQuery();
+				return "success";
+				
+			}else {
+				 
+				 return "project doesnt exist";
+			}
+    		}
+    	catch( Exception e ) {
+    		return e.getMessage().toString();
+    	}
+		
+    }
+    @GET
+    @Path("/getGuI")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getGuaranteeInfo(@HeaderParam("ID") String ID) {
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM PROJECTS WHERE ID_PROJECT="+ID;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+			
+			if(resultSet.next()) {
+					Guarantee guarantee=new Guarantee(resultSet.getString("GUARANTEE_TYPE"),resultSet.getString("GUARANTEE_DESC"));
+					return Response.ok(guarantee, MediaType.APPLICATION_JSON).build();   
+            }
+			else {
+				return Response.status(Response.Status.NOT_FOUND).entity("server").build();
+			}
+			
+    	}
+    
+    	
+    	catch( Exception e ) {
+    		return Response.status(Response.Status.NOT_FOUND).entity("server").build();
+    	}
+
+    }
+    @PUT
+    @Path("/updateGuI")
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    public String updateGuI (@HeaderParam("ID") String ID,@HeaderParam("type") String type,@HeaderParam("desc") String desc) 
+    {
+    	try {
+    		Class.forName("oracle.jdbc.driver.OracleDriver");  
+
+			Connection conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:TEST","SYSTEM","12345");
+			String statement="SELECT * FROM PROJECTS WHERE ID_PROJECT="+ID;
+	        PreparedStatement preparedStatement = conn.prepareStatement(statement);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+
+			if(resultSet.next()) {
+
+				 statement="UPDATE PROJECTS SET GUARANTEE_TYPE=? , GUARANTEE_DESC=? where ID_PROJECT="+ID;
+				 preparedStatement = conn.prepareStatement(statement);
+				 preparedStatement.setString(1,type);
+				 preparedStatement.setString(2,desc);
 				 resultSet = preparedStatement.executeQuery();
 				return "success";
 				
